@@ -1,0 +1,21 @@
+version: "3.9"
+
+services:
+  miniKV:
+    build: .
+    ports:
+      - "6379:6379"
+    command: ["--port", "6379"]
+
+  # For testing multi-instance clustering later
+  miniKV-1:
+    build: .
+    ports:
+      - "6380:6379"
+    command: ["--port", "6379"]
+
+  miniKV-2:
+    build: .
+    ports:
+      - "6381:6379"
+    command: ["--port", "6379"]
