@@ -60,15 +60,16 @@ func TestTTL(t *testing.T) {
 	}
 
 	// Key with TTL
-	s.Set("temp", "gone", 50*time.Millisecond)
+	s.Set("temp", "gone", 2*time.Second)
 	ttl := s.TTL("temp")
-	if ttl <= 0 || ttl > 1 {
-		t.Fatalf("expected TTL ~0s, got %d", ttl)
+	if ttl <= 0 || ttl > 3 {
+		t.Fatalf("expected positive TTL, got %d", ttl)
 	}
 
 	// Wait for expiry
+	s.Set("quick", "flash", 50*time.Millisecond)
 	time.Sleep(60 * time.Millisecond)
-	if ttl := s.TTL("temp"); ttl != -2 {
+	if ttl := s.TTL("quick"); ttl != -2 {
 		t.Fatalf("expected -2 for expired key, got %d", ttl)
 	}
 }
@@ -78,15 +79,18 @@ func TestExpire(t *testing.T) {
 	defer s.Shutdown()
 
 	s.Set("key", "val", 0)
-	if ok := s.Expire("key", 100*time.Millisecond); !ok {
+	if ok := s.Expire("key", 2*time.Second); !ok {
 		t.Fatal("expected Expire to return true")
 	}
 	if ttl := s.TTL("key"); ttl <= 0 {
 		t.Fatalf("expected positive TTL, got %d", ttl)
 	}
 
-	time.Sleep(120 * time.Millisecond)
-	if _, ok := s.Get("key"); ok {
+	// Expire on a short-lived key and wait for expiry
+	s.Set("short", "lived", 0)
+	s.Expire("short", 50*time.Millisecond)
+	time.Sleep(60 * time.Millisecond)
+	if _, ok := s.Get("short"); ok {
 		t.Fatal("expected key to be expired")
 	}
 
