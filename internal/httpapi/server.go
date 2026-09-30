@@ -24,12 +24,17 @@ func NewServer(address string, kvStore *store.Store, errorLog *log.Logger) *http
 	// this is an instance of the Handlers type inside handlers.go
 	// it will contain all the handlers that we need for this project
 	//define the store dependency that is already passed in
-	handlers := Handlers{store: kvStore}
+	handlers := Handlers{store: kvStore, logger: errorLog}
 
 	// creating the handlers for this server
 	mux.HandleFunc("PUT /kv/{key}", handlers.Put)
+	mux.HandleFunc("PUT /kv/{$}", handlers.Put)
 	mux.HandleFunc("GET /kv/{key}", handlers.Get)
+	mux.HandleFunc("GET /kv/{$}", handlers.Get)
 	mux.HandleFunc("GET /health", handlers.Health)
+	mux.HandleFunc("DELETE /kv/{key}", handlers.Delete)
+	mux.HandleFunc("DELETE /kv/{$}", handlers.Delete)
+	mux.HandleFunc("DELETE /clear", handlers.Clear_All)
 
 	// return said http.Server pointer with respective inputs
 	// NOTE: You can use the mux as a value for Handler interface, as the ServeMux type matches the interface

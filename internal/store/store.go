@@ -31,3 +31,21 @@ func (s *Store) Get(key string) (string, bool) {
 	value, exists := s.data[key]
 	return value, exists
 }
+
+func (s *Store) Delete(key string) bool {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	_, existed := s.data[key]
+	delete(s.data, key)
+	return existed
+}
+
+func (s *Store) Clear_All() {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	for key := range s.data {
+		delete(s.data, key)
+	}
+}
